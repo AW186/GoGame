@@ -35,7 +35,7 @@ namespace AWFrameWork
             }
         }
 
-        public void Load()
+        public virtual void Load()
         {
             foreach (Sprite sprite in sprites)
             {
@@ -56,7 +56,7 @@ namespace AWFrameWork
             } 
         }
 
-        public void Update(GameTime time)
+        public virtual void Update(GameTime time)
         {
             foreach (Sprite sprite in sprites)
             {

@@ -10,7 +10,10 @@ namespace GoGame
 		{
 			this.AddSprite(board);
 		}
-
-	}
+        public override void Update(GameTime time)
+        {
+			base.Update(time);
+        }
+    }
 }
 
