@@ -79,12 +79,12 @@ namespace AWFrameWork
 
         public abstract void Load();
 
-        public void Update(GameTime time)
+        public virtual void Update(GameTime time)
         {
             
         }
 
-        public void RemoveFromScene()
+        public virtual void RemoveFromScene()
         {
             if (superScene != null) {
                 superScene.Remove(this);

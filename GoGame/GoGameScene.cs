@@ -12,6 +12,7 @@ namespace GoGame
 		}
         public override void Update(GameTime time)
         {
+			KeyboardState state;
 			base.Update(time);
         }
     }
