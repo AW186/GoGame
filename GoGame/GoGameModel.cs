@@ -1,9 +1,11 @@
 ﻿
+using System.ComponentModel;
 using Microsoft.Xna.Framework.Graphics;
 namespace GoGame
 {
 	public class GoGameModel
 	{
+		private bool scoreMode = false;
 		public enum Turn
 		{
 			white = -1,
@@ -19,7 +21,14 @@ namespace GoGame
 				return turns;
 			}
 		}
-		int[,] board = new int[19,19];
+		private int[,] board = new int[19,19];
+		public int[,] Board
+		{
+			get
+			{
+				return board;
+			}
+		}
 		public GoGameModel()
 		{
 		}
@@ -45,7 +54,7 @@ namespace GoGame
             foreach (Point dir in directions)
             {
                 int newX = node.X + dir.X;
-                int newY = node.X + dir.Y;
+                int newY = node.Y + dir.Y;
                 if (newX >= 0 && newX < 19 && newY >= 0 && newY < 19 && board[newX, newY] == 0)
                 {
                     q.Enqueue(new Point(newX, newY));
@@ -53,7 +62,30 @@ namespace GoGame
                 }
             }
         }
-        public void showScore()
+		public bool SwitchScoreMode()
+		{
+			if (scoreMode)
+			{
+				removeScore();
+            } else
+			{
+				showScore();
+			}
+			scoreMode = !scoreMode;
+			return scoreMode;
+		}
+		private void removeScore()
+		{
+			for (int x = 0; x < 19; x++)
+			{
+                for (int y = 0; y < 19; y++)
+                {
+					if (board[x, y] > 1 || board[x, y] < -1)
+						board[x, y] = 0;
+                }
+            }
+		}
+        private void showScore()
 		{
 			Queue<Point> whiteChess = new Queue<Point>();
             Queue<Point> blackChess = new Queue<Point>();
@@ -73,7 +105,7 @@ namespace GoGame
                 }
 			}
         }
-		public int getScore(Turn side)
+		public int GetScore(Turn side)
 		{
 			int count = 0;
             for (int x = 0; x < 19; x++)
@@ -89,14 +121,25 @@ namespace GoGame
 		{
             turns = (Turn)(-(int)turns);
         }
+		public void PlaceChessOnBoard(Point point)
+		{
+			PlaceChessOnBoard(point.X, point.Y);
+		}
 		public void PlaceChessOnBoard(int x, int y)
 		{
-			if (x == deadPoint.X && y == deadPoint.Y || board[x,y] != 0)
+            if (x < 0 || x >= 19 || y < 0 || y >= 19)
 			{
 				return;
 			}
-			int killed = kill(x, y, (Turn)(-(int)turns));
+
+            if (x == deadPoint.X && y == deadPoint.Y || board[x,y] != 0)
+			{
+				return;
+            }
             board[x, y] = (int)Turns;
+            int killed = kill(x, y, (Turn)(-(int)turns));
+			Point recordDead = deadPoint;
+			deadPoint = new Point(-1, -1);
             if (killed == 0)
             {
                 bool[,] visited = new bool[19, 19];
@@ -106,30 +149,40 @@ namespace GoGame
 					board[x, y] = 0;
 					return;
 				}
-			}
+            } else if (killed == 1)
+            {
+                bool[,] visited = new bool[19, 19];
+                Queue<Point> group = getGroup(new Point(x, y), visited, Turns);
+				if (group.Count == 1)
+				{
+					deadPoint = recordDead;
+				}
+            }
 			turns = (Turn)(-(int)turns);
 		}
 		private int kill(int x, int y, Turn side)
 		{
 			int killed = 0;
+			Console.Out.Write("Kill method {0:D}\n", (int)side);
             foreach (Point dir in directions)
             {
                 int newX = x + dir.X;
-                int newY = x + dir.Y;
+                int newY = y + dir.Y;
 
                 bool[,] visited = new bool[19, 19];
                 if (newX >= 0 && newX < 19 && newY >= 0 && newY < 19
 					&& !visited[newX, newY] && board[newX, newY] == (int)side)
                 {
                     Queue<Point> group = getGroup(new Point(newX, newY), visited, side);
-					if (isDead(group))
-					{
-						killed += group.Count();
+                    if (isDead(group))
+                    {
+						deadPoint = new Point(newX, newY);
+                        killed += group.Count();
 						while(group.Count() > 0)
 						{
 							Point remove = group.Dequeue();
-							board[remove.X, remove.Y] = 0; 
-						}
+							board[remove.X, remove.Y] = 0;
+                        }
 					}
                 }
             }
@@ -148,11 +201,12 @@ namespace GoGame
 				foreach (Point dir in directions)
 				{
 					int newX = node.X + dir.X;
-                    int newY = node.X + dir.Y;
+                    int newY = node.Y + dir.Y;
 					if (newX >= 0 && newX < 19 && newY >= 0 && newY < 19
 						&& !visited[newX,newY] && board[newX, newY] == (int)side)
 					{
-						q.Enqueue(new Point(newX, newY));
+                        visited[newX, newY] = true;
+                        q.Enqueue(new Point(newX, newY));
                         group.Enqueue(new Point(newX, newY));
                     }
                 }
@@ -165,9 +219,10 @@ namespace GoGame
                 foreach (Point dir in directions)
                 {
                     int newX = p.X + dir.X;
-                    int newY = p.X + dir.Y;
+                    int newY = p.Y + dir.Y;
                     if (newX >= 0 && newX < 19 && newY >= 0 && newY < 19 && board[newX, newY] == 0)
                     {
+						Console.Out.Write("Alive by {0:D}, {1:D}\n", newX, newY);
 						return false;
                     }
                 }

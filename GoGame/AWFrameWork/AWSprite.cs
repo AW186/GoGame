@@ -90,6 +90,11 @@ namespace AWFrameWork
                 superScene.Remove(this);
             }
         }
+
+        public virtual void click(MouseState state)
+        {
+            
+        }
     }
 }
 

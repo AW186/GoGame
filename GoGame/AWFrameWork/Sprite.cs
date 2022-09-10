@@ -11,6 +11,7 @@ namespace AWFrameWork
 		public void Load();
 		public void Update(GameTime time);
         public void RemoveFromScene();
+		public void click(MouseState state);
 	}
 }
 

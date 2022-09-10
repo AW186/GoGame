@@ -7,13 +7,12 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
     private Scene scene;
-    public static ContentManager Content;
+    public static new ContentManager Content;
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
         base.Content.RootDirectory = "Content";
         IsMouseVisible = true;
-
         Game1.Content = base.Content;
     }
 
@@ -30,6 +29,7 @@ public class Game1 : Game
 
         // TODO: use this.Content to load your game content here
         scene.Batch = _spriteBatch;
+        scene.Load();
     }
 
     protected override void Update(GameTime gameTime)
@@ -38,7 +38,7 @@ public class Game1 : Game
             Exit();
 
         // TODO: Add your update logic here
-        scene.Update(gameTime);
+        scene.Update(gameTime, Keyboard.GetState(), Mouse.GetState());
         base.Update(gameTime);
     }
 
